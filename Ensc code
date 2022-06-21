@@ -1,0 +1,225 @@
+// main.cpp, put your driver code here,
+// you can manipulate your class objects here
+#include <iostream> //cin and cout
+#include <ostream>//cin and cout
+#include <iomanip>
+#include <string>
+#include "time.hpp"
+#include "date.hpp"
+#include "calendar.hpp"
+#include <math.h>
+
+using namespace std;
+
+int DateIndex(int month, int day);
+int TimeIndex(int Hour1, int Minute1);
+void input_date(istream &in_stream, int &month, int &day, string string_1);
+void input_time(istream &in_stream, int &bh, int &bm, int &eh, int &em,
+		string string_2);
+void input_ans(istream &in_stream, int &number, string string_1);// take user input from the menu
+
+int main() {
+
+	int ans;
+// instructions
+	cout << "\nCurrent calendar takes weekdays May 8th 2022 to August 8th 2022."
+			<< endl;
+	cout
+			<< "When entering dates all months and days need to be entered in integer form."
+			<< endl;
+	cout
+			<< "Times need to be booked as a 24 hour time clock (ex. 4 am = 4, 4pm = 16), and minutes entered as 0 or 30."
+			<< endl;
+	cout << "Use ctrl+c to exit." << endl << endl;
+
+	//menu
+	//object summer
+	Calendar summer;
+	for (;;) { //do while loop that'll keep repeating until a user picks a choice
+
+		cout << endl << "==================MENU==================" << endl;
+		cout << "(1)Show all booked appointments" << endl;
+		cout << "(2)Show available days" << endl;
+		cout << "(3)Search available time slot of a day" << endl;
+		cout << "(4)Book an appointment" << endl;
+		cout << "(5)Query an appointment time" << endl;
+		cout << "(6)Cancel an appointment" << endl;
+		cout << "========================================" << endl;
+
+		input_ans(cin, ans, "Your choice is: ");
+		if (ans == 1) {
+			cout << summer;
+		} else if (ans == 2) {
+			summer.printFreeTimeDays();
+			//call the printfree days function
+		} else if (ans == 3) {
+			//get user input and chech if that booking is valid, then search for its occcurence
+
+			//local variables
+			int month3, day3; //initialized to zero
+			int checkdate = 1;
+			do {
+				input_ans(cin, month3,
+						"Please enter a VALID month to see available time slot");
+				input_ans(cin, day3, "Please enter a VALID day");
+				Date inputdate3(month3, day3);
+				checkdate = inputdate3.isValid(); //check if valid
+				summer.printFreeTimeSlots(inputdate3);
+				//printfree time slots will check which index this date is store in, and see if its booked or not
+			} while (checkdate != 0);
+		} else if (ans == 4) {
+			int month4, day4, bh4, bm4, eh4, em4; //get user input
+			int checkdate4 = 1;
+			int checktime4 = 1;
+			bool yesBooked;
+			int aptnumber_temp;
+			do {
+				input_ans(cin, aptnumber_temp,
+						"Enter appointment number: \ne.g. Enter '2' for second appointment \n");
+				input_ans(cin, month4, "Enter month: \n");
+				input_ans(cin, day4, "Enter day of month: \n");
+				input_ans(cin, bh4, "Enter starting hour:\n");
+				input_ans(cin, bm4, "Enter starting minute: \n");
+				input_ans(cin, eh4, "Enter ending hour: \n");
+				input_ans(cin, em4, "Enter ending minute: \n");
+				Date inputdate4(month4, day4);
+				checkdate4 = inputdate4.isValid();
+				TimeRange inputtime4(bh4, bm4, eh4, em4);
+				checktime4 = inputtime4.isValid();
+
+				yesBooked = summer.book(inputdate4, inputtime4, aptnumber_temp);
+				//call the book function, take in 3 arguements
+				//then books user an appointment
+			} while (checkdate4 != 0 || checktime4 != 0);
+			;
+			if (yesBooked == true) { //yes we've booked you an appointment
+				cout << "Appointment no." << aptnumber_temp << " is booked."
+						<< endl;
+						//print out appointment number booked
+			}
+		} else if (ans == 5) {
+			int month5, day5, bh5, bm5, eh5, em5;
+			int checkdate5 = 1;
+			int checktime5 = 1;
+			do {
+				//take user input for the appointment they want to cancel
+				input_ans(cin, month5, "Enter month: \n");
+				input_ans(cin, day5, "Enter day of month: \n");
+				input_ans(cin, bh5, "Enter starting hour:\n");
+				input_ans(cin, bm5, "Enter starting minute: \n");
+				input_ans(cin, eh5, "Enter ending hour: \n");
+				input_ans(cin, em5, "Enter ending minute: \n");
+
+				//error check if its a valid date and time input
+				Date inputdate5(month5, day5);
+				checkdate5 = inputdate5.isValid();
+				TimeRange inputtime5(bh5, bm5, eh5, em5);
+				checktime5 = inputtime5.isValid();
+
+				summer.query(inputdate5, inputtime5);
+			} while (checkdate5 != 0 || checktime5 != 0);
+		} else if (ans == 6) {
+
+			int month6, day6, bh6, bm6, eh6, em6;
+			int checkdate6 = 1;
+			int checktime6 = 1;
+			bool yesCancelled;
+			do {
+				input_ans(cin, month6, "Enter month: \n");
+				input_ans(cin, day6, "Enter day of month: \n");
+				input_ans(cin, bh6, "Enter starting hour:\n");
+				input_ans(cin, bm6, "Enter starting minute: \n");
+				input_ans(cin, eh6, "Enter ending hour: \n");
+				input_ans(cin, em6, "Enter ending minute: \n");
+				Date inputdate6(month6, day6);
+				checkdate6 = inputdate6.isValid();
+				TimeRange inputtime6(bh6, bm6, eh6, em6);
+				checktime6 = inputtime6.isValid();
+
+				yesCancelled = summer.cancel(inputdate6, inputtime6);
+			} while (checkdate6 != 0 || checktime6 != 0);
+
+			if (yesCancelled == true) {
+				cout << "Time range is now available again." << endl;
+			}
+
+		} else { //if user enters something outside the menu
+			cout << "You can only enter the above options." << endl;
+		}
+
+	}
+}
+
+int DateIndex(int month, int day) {
+	// making an index for a specific day in appt array
+	int index = 0;
+
+	if (month == 5) {
+		index = day - 9;
+		//9-9 =0, date 9 is index 0
+		//10-9= 1, date 10 is on index 1
+		//continues
+	}
+	if (month == 6) {
+		index = day + 22;
+	}
+	if (month == 7) {
+		index = day + 22 + 30;
+	}
+	if (month == 8) {
+		index = day + 22 + 30 + 31;
+	}
+
+	return index;
+}
+
+int TimeIndex(int Hour1, int Minute1) {
+	// changes time to an index for class function
+	int index = Hour1 * 2;
+	if (Minute1 == 30) {
+		index++;
+	}
+	return index;
+}
+void input_ans(istream &in_stream, int &number, string string_1) //take in user's reply for yes/no questions
+		{
+	cout << string_1 << endl;
+	in_stream >> number;
+	while (in_stream.fail())    //prevent errors
+	{
+		in_stream.clear();
+		in_stream.ignore(1000, '\n');
+		cout << string_1 << endl;
+		in_stream >> number;
+	}
+
+}
+
+void input_date(istream &in_stream, int &month, int &day, string string_1) //output a string and take in their entered date
+		{
+	cout << string_1 << endl;
+	in_stream >> month >> day;
+	while (in_stream.fail())    //prevent errors
+	{
+		in_stream.clear();
+		in_stream.ignore(1000, '\n');
+		cout << string_1 << endl;
+		in_stream >> month >> day;
+	}
+
+}
+
+void input_time(istream &in_stream, int &bh, int &bm, int &eh, int &em,
+		string string_2) //output string to users and take in their entered time range
+		{
+	cout << string_2 << endl;
+	cin >> bh >> bm >> eh >> em;
+	while (cin.fail())    //prevent errors
+	{
+		cin.clear();
+		cin.ignore(10000, '\n');
+		cout << string_2 << endl;
+		cin >> bh >> bm >> eh >> em;
+	}
+}
+
